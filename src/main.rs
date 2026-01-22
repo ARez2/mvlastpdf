@@ -22,7 +22,7 @@ fn main() {
 
     let args: Vec<String> = std::env::args().collect();
     let mut target = PathBuf::from(args[args.len() - 1].clone());
-    let target_is_file = target.is_file();
+    let target_is_file = target.extension().is_some();
 
     let mut entries = std::fs::read_dir(downloads)
         .unwrap()
@@ -33,19 +33,21 @@ fn main() {
 
     let mut moved_something = false;
     for file in &entries {
-        if let Some(ext) = file.path().extension() {
-            if ext == "pdf" {
-                println!("Moving {:?} to {:?}", file.path(), target);
-                if !target.exists() {
-                    std::fs::create_dir_all(&target).unwrap();
-                }
-                if !target_is_file {
-                    target = target.join(file.file_name());
-                }
-                std::fs::rename(file.path(), target).unwrap();
-                moved_something = true;
-                break;
+        if let Some(ext) = file.path().extension()
+            && ext == "pdf"
+        {
+            if !target_is_file {
+                println!("Target is not file, adding {}", file.file_name().display());
+                target = target.join(file.file_name());
             }
+            if !target.parent().unwrap().exists() {
+                println!("Parent path doesnt exist, creating...");
+                std::fs::create_dir_all(target.parent().unwrap()).unwrap();
+            }
+            println!("Moving {:?} to {:?}", file.path(), target);
+            std::fs::rename(file.path(), target).unwrap();
+            moved_something = true;
+            break;
         }
     }
 
