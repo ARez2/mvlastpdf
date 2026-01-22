@@ -3,8 +3,17 @@ use std::{fs::DirEntry, path::PathBuf};
 use users::get_current_username;
 
 fn main() {
+    #[cfg(target_os = "linux")]
     let downloads = PathBuf::from(format!(
         "/home/{}/Downloads/",
+        get_current_username()
+            .expect("Could not get username")
+            .to_str()
+            .unwrap()
+    ));
+    #[cfg(target_os = "windows")]
+    let downloads = PathBuf::from(format!(
+        "C:\\Users\\{}\\Downloads/",
         get_current_username()
             .expect("Could not get username")
             .to_str()
