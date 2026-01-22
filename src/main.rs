@@ -3,22 +3,12 @@ use std::{fs::DirEntry, path::PathBuf};
 use users::get_current_username;
 
 fn main() {
+    let username = get_current_username().expect("Could not get username");
+    let username = username.to_str().unwrap();
     #[cfg(target_os = "linux")]
-    let downloads = PathBuf::from(format!(
-        "/home/{}/Downloads/",
-        get_current_username()
-            .expect("Could not get username")
-            .to_str()
-            .unwrap()
-    ));
+    let downloads = PathBuf::from(format!("/home/{}/Downloads/", username));
     #[cfg(target_os = "windows")]
-    let downloads = PathBuf::from(format!(
-        "C:\\Users\\{}\\Downloads/",
-        get_current_username()
-            .expect("Could not get username")
-            .to_str()
-            .unwrap()
-    ));
+    let downloads = PathBuf::from(format!("C:\\Users\\{}\\Downloads/", username));
 
     let args: Vec<String> = std::env::args().collect();
     let mut target = PathBuf::from(args[args.len() - 1].clone());
